@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const AdminOtp=require('../../models/adminOtp')
 const helper=require('../../helper/helper')
-const radis=require('../../helper/redis')
+const radis=require('../../helper/redis');
 require('dotenv').config();
 
 exports.userRegister=async(req,res)=>{
@@ -36,15 +36,7 @@ exports.userRegister=async(req,res)=>{
   
 }
 
-exports.userLogin=async(req,res)=>{
-    try {
-        
-        
-    } catch (error) {
 
-        res.status(500).json({message:"Internal server error"}) 
-    }
-}
 exports.adminLogin=async(req,res)=>{
     try {
         const {email,password}=req.body;
@@ -84,9 +76,12 @@ exports.adminLogin=async(req,res)=>{
 exports.userLogin=async(req,res)=>{
     try {
         const {email,password}=req.body;
-        const user=await userModel.findOne({email:email})
+        const user=await userModel.findOne({email:email,role:"user"})
         if(!user){
-            return res.status(400).json({message:"User not found"})
+            return res.status(400).json({
+                success:false,
+                message:"User not found please register"
+            })
         }
         const isMatch=await bcrypt.compare(password,user.password)
         if(!isMatch){
