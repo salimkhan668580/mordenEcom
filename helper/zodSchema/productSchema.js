@@ -1,5 +1,5 @@
 const z=require('zod')
-
+const { ObjectId } = require("mongodb");
 
 exports.createProduct=z.object({
     name: z.string(),
@@ -20,3 +20,9 @@ exports.editProduct=z.object({
     category: z.string(),
 })
 
+
+exports.deleteProduct = z.object({
+  productId: z.string().refine((val) => ObjectId.isValid(val), {
+    message: "Invalid product ID format",
+  }),
+});

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const AdminOtp=require('../../models/adminOtp')
 const helper=require('../../helper/helper')
 const radis=require('../../helper/redis');
+const { success } = require('zod');
 require('dotenv').config();
 
 exports.userRegister=async(req,res)=>{
@@ -29,6 +30,25 @@ exports.userRegister=async(req,res)=>{
         await newUser.save()
       return  res.status(200).json({message:"User registered successfully",user:newUser})
     } catch (error) {
+        res.status(500).json({message:"Internal server error"})
+        
+    }
+
+  
+}
+exports.EditProfile=async(req,res)=>{
+    const {userId,password,role,...payload}=req.body
+
+    try {
+        const user=await userModel.findByIdAndUpdate(userId,payload, { new: true });
+        if(!user){
+           return res.status(400).json({success:false,message:"User not found"})
+        }
+
+      
+      return  res.status(200).json({success:true ,message:"User Edit successfully",user})
+    } catch (error) {
+        console.log("error in editing profile",error)
         res.status(500).json({message:"Internal server error"})
         
     }
@@ -92,8 +112,9 @@ exports.userLogin=async(req,res)=>{
             process.env.JWT_SECRET,
   { expiresIn: 60 * 60 * 24 }
 );
-        res.status(200).json({message:"Login successful", user,token})    
 
+radis.set(user.email,token,{EX: 500})
+ res.status(200).json({message:"Login successful", user,token})    
     } catch (error) {
      console.log(error)
         res.status(500).json({message:"Internal server error"}) 

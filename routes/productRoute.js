@@ -10,8 +10,10 @@ const isAdminLoggedIn=require('../middleware/isAdminLoggedIn')
 
 // productRouter.get("/:id",zodSchemaValidator(zodSchema.userRegistration), userController.userRegister)
 productRouter.get("/",productController.getAllProducts)
+
 productRouter.use(isAdminLoggedIn.isAdminLoggedIn)
 productRouter.post("/",zodSchemaValidator(productSchema.createProduct), productController.createProduct)
+productRouter.delete("/",zodSchemaValidator(productSchema.deleteProduct), productController.deteleProduct)
 productRouter.put("/",zodSchemaValidator(productSchema.editProduct), productController.editProduct)
 // productRouter.delete("/:id",zodSchemaValidator(zodSchema.AdminLogin), userController.userLogin)
 
