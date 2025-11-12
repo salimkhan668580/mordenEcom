@@ -10,4 +10,8 @@ authRouter.post("/send-otp",zodSchemaValidator(zodSchema.sendOpt), adminControll
 authRouter.post("/verify-otp",zodSchemaValidator(zodSchema.verifyOpt), adminController.verifyOtp)
 authRouter.post("/change-pwd",zodSchemaValidator(zodSchema.changeAdminPassword), adminController.changePwd)
 
+
+
+
+
 module.exports = authRouter;

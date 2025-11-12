@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const orderSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -19,7 +21,7 @@ const orderSchema = new mongoose.Schema({
             required: true
         }
     }],
-    totalAmount: {
+    totalPrice: {
         type: Number,
         required: true
     },
@@ -29,17 +31,37 @@ const orderSchema = new mongoose.Schema({
         default: 'pending',
         required: true
     },
+    paymentMethod: {
+        type: String,
+        enum: ['COD', 'CARD',"UPI","NETBANKING"],
+  
+        required: true
+    },
     orderStatus: {
         type: String,
         enum: ['pending', 'shipped', 'delivered'],
         default: 'pending',
-        required: true
+      
     },
-    address: {
-        type: String,
-        required: true
-    },
+    deleveryAddress: {
+        fullAddress: {
+            type: String,
+            required: true
+        },
+       city:{
+           type: String,
+           required: true
+       },
+       state:{
+           type: String,
+           required: true
+       },
+       pin:{
+           type: Number,
+           required: true
+       } 
 
+    },
 },{timestamps: true});
 
 module.exports = mongoose.model('Order', orderSchema);

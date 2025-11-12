@@ -1,6 +1,15 @@
 const z= require('zod');
 const { ObjectId } = require("mongodb");
 
+exports.mongooseId=z.object({
+    userId: z
+    .string()
+    .refine(
+      (val) => ObjectId.isValid(val),
+      { message: "Invalid user ID format" }
+    ),
+})
+    
 
 exports.userRegistration=z.object({
     userId: z

@@ -5,7 +5,8 @@ const User=require('../../models/userModel')
 const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 
-
+const orderModel=require('../../models/orderModel')
+const {ObjectId}=require('mongodb')
 const radis=require('../../helper/redis')
 
 exports.sendOtp=async(req,res)=>{   
@@ -120,4 +121,134 @@ exports.changePwd=async(req,res)=>{
         res.status(500).json({message:"Internal server error"}) 
     }
     
+}
+
+
+// =============user admin permission======
+exports.deleteUser=async(req,res)=>{   
+    try {
+        const {userId}=req.body
+        if(!userId){
+            return res.status(400).json({message:"User id is required"})
+        }
+        const user=await User.findByIdAndUpdate(userId,{isDeleted:true},{new:true})
+        if(!user){
+            return res.status(400).json({message:"User not found"})
+        }
+        return res.status(200).json({success:true,message:"User deleted successfully"})
+       
+}catch (error) {
+        console.log("error in delete user in Admin",error)
+        res.status(500).json({message:"Internal server error"}) 
+    }
+    
+}
+
+exports.getAllOrders=async(req,res)=>{
+    try {
+      let {limit,page,search,userId}=req.query
+
+      if(userId){
+        const orderDetails=await orderModel.aggregate([
+          {
+            $match:{userId:new ObjectId(userId)}
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "userDetails"
+            }
+          },
+          {
+            $unwind:"$userDetails"
+          },
+          {
+            $lookup: {
+              from: "products",
+              localField: "items.productId",
+              foreignField: "_id",
+              as: "productDetails"
+            }
+          },
+          {
+            $project:{
+              "userDetails.password":0,
+              userId:0,
+              "productDetails.stock":0,
+              items:0
+            }
+          }
+
+
+        ])
+        return res.status(200).json({success:false,message:"Order details",orderDetails})
+      }
+
+
+      if(page==undefined || limit==undefined){
+        page=1
+        limit=10
+      }
+      const matchQuery={}
+      if(search){
+        matchQuery.$or=[
+          {userId:{$regex:search,$options:"i"}},
+          {orderId:{$regex:search,$options:"i"}},
+          {"userDetails.firstName":{$regex:search,$options:"i"}},
+          {"userDetails.lastName":{$regex:search,$options:"i"}}
+        ]
+      }
+        const orders=await orderModel.aggregate([
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "userDetails"
+            }
+          },
+        
+          {
+            $unwind: "$userDetails"
+          },
+          {
+            $match:matchQuery
+          },
+          {
+            $project:{
+              "userDetails.password":0,
+              userId:0
+            }
+          },
+          {
+            $sort:{createdAt:-1}
+          },
+
+          {
+            $skip:(Number(page-1))*Number(limit)
+          },
+          {
+            $limit:Number(limit)
+          },
+          
+        ])
+
+        const totalDoc=await orderModel.countDocuments(matchQuery)
+        const totalPage=Math.ceil(totalDoc/Number(limit))
+const pagination={
+  page,
+  limit,
+  totalDoc,
+  totalPage
+}
+
+        return res.status(200).json({success:true,message:"Orders fetched successfully",data:orders,pagination})
+       
+}catch (error) {
+        console.log("error in get  user orders in Admin",error)
+        res.status(500).json({message:"Internal server error"})
+}
+  
 }

@@ -8,10 +8,14 @@ const userRouter = require('./routes/userRoute');
 const authRouter = require('./routes/authRoute');
 const productRouter = require('./routes/productRoute');
 const uploadRoute = require('./routes/commonRoute');
+const adminRoute = require('./routes/adminRoute');
+const cronJob=require('./cron')
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser())
 db();
+// cronJob.start()
+
 
 app.use(morgan('dev'));
 
@@ -19,6 +23,7 @@ app.use("/auth",authRouter);
 app.use("/upload",uploadRoute);
 app.use("/user",userRouter);
 app.use("/product",productRouter);
+app.use("/admin",adminRoute);
 app.get("/", function(req, res) {
     console.log("Hello World salim from app.js");
     return res.send("Hello World salim");

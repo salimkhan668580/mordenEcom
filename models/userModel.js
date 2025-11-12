@@ -1,6 +1,4 @@
-
-
-const mongoose =require('mongoose');
+const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -26,6 +24,18 @@ const userSchema = new mongoose.Schema({
         state: String,
         pin: Number
     }],
-   
-},{timestamps: true});
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    deactivatedAt: {
+        type: Date,
+        default: null
+    }
+}, { timestamps: true });
+
 module.exports = mongoose.model('User', userSchema);
